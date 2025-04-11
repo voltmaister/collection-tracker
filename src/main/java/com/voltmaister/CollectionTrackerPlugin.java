@@ -1,11 +1,10 @@
 package com.voltmaister;
 
 // Standard Java imports
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.Executors;
 
 // Java Swing imports
@@ -14,7 +13,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 // External library imports
-import com.google.inject.Provides;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.chat.QueuedMessage;
 import org.slf4j.Logger;
@@ -24,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.events.GameStateChanged;
-import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -41,7 +38,6 @@ import net.runelite.client.util.AsyncBufferedImage;
 
 // Project-specific imports
 import com.voltmaister.api.TempleApiClient;
-import com.voltmaister.config.CollectionTrackerConfig;
 import com.voltmaister.data.CollectionItem;
 import com.voltmaister.db.CollectionDatabase;
 import com.voltmaister.parser.CollectionParser;
@@ -64,7 +60,6 @@ public class CollectionTrackerPlugin extends Plugin
 	@Inject private ChatMessageManager chatMessageManager;
 	@Inject private ClientToolbar clientToolbar;
 	@Inject private Client client;
-	@Inject private CollectionTrackerConfig config;
 
 	private NavigationButton navButton;
 	private PluginPanel panel;
@@ -82,7 +77,7 @@ public class CollectionTrackerPlugin extends Plugin
 
 	private BufferedImage loadIcon() {
 		try {
-			return ImageUtil.loadImageResource(getClass(), "/test.png");
+			return ImageUtil.loadImageResource(getClass(), "/Collection_log.png");
 		} catch (Exception e) {
 			log.warn("Using fallback icon", e);
 			BufferedImage fallback = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
@@ -103,42 +98,63 @@ public class CollectionTrackerPlugin extends Plugin
 		panel = new PluginPanel() {
 		};
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+		panel.setBorder(new EmptyBorder(15, 15, 15, 15));
 		panel.setBackground(new Color(43, 39, 35));
 
 		// Title
 		JLabel titleLabel = new JLabel("Collection Tracker", JLabel.CENTER);
 		titleLabel.setForeground(Color.WHITE);
 		titleLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+		titleLabel.setFont(titleLabel.getFont().deriveFont(18f));
 		panel.add(titleLabel);
+		panel.add(Box.createVerticalStrut(10));
 
-		// Buttons
+		// Button section
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
 		buttonPanel.setBackground(new Color(43, 39, 35));
+		buttonPanel.setAlignmentX(JPanel.CENTER_ALIGNMENT);
 
-
-		JButton printButton = new JButton("Print Collections");
+		JButton printButton = new JButton("📄 Print Collections");
+		printButton.setAlignmentX(JButton.CENTER_ALIGNMENT);
+		printButton.setMaximumSize(new Dimension(200, 30));
+		printButton.setMargin(new Insets(5, 10, 5, 10));
+		printButton.setFocusable(false);
 		printButton.addActionListener(e -> printAllCollections());
 		buttonPanel.add(printButton);
+		buttonPanel.add(Box.createVerticalStrut(8));
 
-		JButton syncButton = new JButton("Sync Collection Log");
+		JButton syncButton = new JButton("🔄 Sync Collection Log");
+		syncButton.setAlignmentX(JButton.CENTER_ALIGNMENT);
+		syncButton.setMaximumSize(new Dimension(200, 30));
+		syncButton.setMargin(new Insets(5, 10, 5, 10));
+		syncButton.setFocusable(false);
 		syncButton.addActionListener(e -> syncCollectionLog());
 		buttonPanel.add(syncButton);
+		buttonPanel.add(Box.createVerticalStrut(8));
 
-		printButton.setAlignmentX(JButton.CENTER_ALIGNMENT);
-		syncButton.setAlignmentX(JButton.CENTER_ALIGNMENT);
+		JButton helpButton = new JButton("❔ Show Commands");
+		helpButton.setAlignmentX(JButton.CENTER_ALIGNMENT);
+		helpButton.setMaximumSize(new Dimension(200, 30));
+		helpButton.setMargin(new Insets(5, 10, 5, 10));
+		helpButton.setFocusable(false);
+		helpButton.addActionListener(e -> showHelp());
+		buttonPanel.add(helpButton);
 
-		buttonPanel.add(Box.createVerticalStrut(5)); // space between buttons
+
+		buttonPanel.add(Box.createVerticalStrut(5)); // extra spacing if needed
 
 
 		panel.add(buttonPanel);
+		panel.add(Box.createVerticalStrut(15));
 
+		// Output area
 		outputArea.setEditable(false);
 		outputArea.setLineWrap(true);
 		outputArea.setWrapStyleWord(true);
 		outputArea.setBackground(new Color(30, 30, 30));
 		outputArea.setForeground(Color.WHITE);
+		outputArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
 		outputArea.setBorder(new EmptyBorder(10, 10, 10, 10));
 
 		JScrollPane scrollPane = new JScrollPane(outputArea);
@@ -149,6 +165,7 @@ public class CollectionTrackerPlugin extends Plugin
 
 		panel.add(scrollPane);
 
+		// Navigation button
 		navButton = NavigationButton.builder()
 				.tooltip("Collection Tracker")
 				.icon(icon)
@@ -216,7 +233,11 @@ public class CollectionTrackerPlugin extends Plugin
 	private void printAllCollections()
 	{
 		Executors.newSingleThreadExecutor().execute(() -> {
-			java.util.List<CollectionItem> items = CollectionDatabase.getAllItems();
+			String playerName = client.getLocalPlayer() != null
+					? normalizePlayerName(Objects.requireNonNull(client.getLocalPlayer().getName()))
+					: "";
+			List<CollectionItem> items = CollectionDatabase.getAllItems(playerName);
+
 
 			if (items.isEmpty()) {
 				SwingUtilities.invokeLater(() ->
@@ -240,7 +261,8 @@ public class CollectionTrackerPlugin extends Plugin
 	private void printCollectionForCategory(String category)
 	{
 		Executors.newSingleThreadExecutor().execute(() -> {
-			java.util.List<CollectionItem> items = CollectionDatabase.getItemsByCategory(category);
+			String playerName = client.getLocalPlayer().getName(); // ✅ declare properly
+			List<CollectionItem> items = CollectionDatabase.getItemsByCategory(playerName.toLowerCase(), category); // ✅ pass it
 
 			if (items.isEmpty()) {
 				SwingUtilities.invokeLater(() ->
@@ -266,15 +288,8 @@ public class CollectionTrackerPlugin extends Plugin
 		Executors.newSingleThreadExecutor().execute(() -> {
 			log.info("🔄 Starting syncCollectionLog()...");
 
-			log.info("🔧 Initializing database inside sync thread...");
 			CollectionDatabase.init();
-
 			CollectionDatabase.clearAll();
-
-
-			// ✅ Ensure DB is initialized on the same thread before inserting
-			log.info("🔧 Initializing database inside sync thread...");
-			CollectionDatabase.init();
 
 			if (client.getLocalPlayer() == null) {
 				log.warn("⚠️ Local player is null — not logged in yet.");
@@ -284,7 +299,7 @@ public class CollectionTrackerPlugin extends Plugin
 				return;
 			}
 
-			String username = client.getLocalPlayer().getName();
+			String username = client.getLocalPlayer().getName().toLowerCase();
 			log.info("👤 Detected username: {}", username);
 
 			SwingUtilities.invokeLater(() ->
@@ -304,7 +319,7 @@ public class CollectionTrackerPlugin extends Plugin
 
 			log.info("🧩 Parsing and storing JSON...");
 			CollectionParser parser = new CollectionParser();
-			parser.parseAndStore(json);
+			parser.parseAndStore(normalizePlayerName(username), json);
 			log.info("✅ Parsing complete.");
 
 			SwingUtilities.invokeLater(() ->
@@ -351,19 +366,23 @@ public class CollectionTrackerPlugin extends Plugin
 
 
 	@Subscribe
-	public void onChatMessage(ChatMessage event) {
+	public void onChatMessage(ChatMessage event)
+	{
 		final ChatMessageType type = event.getType();
 		final String rawMessage = event.getMessage().trim();
 
-		// Check message type and prefix
+		// Only react to public, private, or clan chat
 		if (type != ChatMessageType.PUBLICCHAT &&
 				type != ChatMessageType.FRIENDSCHAT &&
 				type != ChatMessageType.PRIVATECHAT &&
-				type != ChatMessageType.CLAN_CHAT) {
+				type != ChatMessageType.CLAN_CHAT)
+		{
 			return;
 		}
 
-		if (!rawMessage.toLowerCase().startsWith("!log ")) {
+		// Command must start with "!log "
+		if (!rawMessage.toLowerCase().startsWith("!log "))
+		{
 			return;
 		}
 
@@ -371,55 +390,86 @@ public class CollectionTrackerPlugin extends Plugin
 		if (parts.length == 0)
 			return;
 
+		// Normalize boss name
 		String bossInput = parts[0].trim().replace(' ', '_');
 		String bossKey = CATEGORY_ALIASES.getOrDefault(bossInput.toLowerCase(), bossInput.toLowerCase());
 
-		String playerName;
-		if (parts.length == 2) {
-			playerName = parts[1].trim();
-		} else {
-			playerName = event.getName(); // fallback to sender
-		}
-
+		// Determine target player (specified or sender)
+		String playerName = (parts.length == 2) ? parts[1].trim() : event.getName();
+		String normalizedPlayerName = normalizePlayerName(playerName);  // Normalize the player name for the API call
 		String localName = client.getLocalPlayer() != null ? client.getLocalPlayer().getName() : "";
+		boolean isLocalPlayer = normalizedPlayerName.equalsIgnoreCase(localName);
 
-		boolean isLocalPlayer = playerName.equalsIgnoreCase(localName);
+		Executors.newSingleThreadExecutor().execute(() ->
+		{
+			if (!CollectionDatabase.hasPlayerData(normalizedPlayerName))
+			{
+				log.info("📭 No local data for '{}', fetching from API...", normalizedPlayerName);
+				String json = TempleApiClient.fetchLogForChat(normalizedPlayerName);
 
-		Executors.newSingleThreadExecutor().execute(() -> {
-			List<CollectionItem> items;
+				// Handle empty or failed fetch
+				if (json == null || json.isEmpty())
+				{
+					log.warn("❌ No data fetched for user: {}", normalizedPlayerName);
 
-			if (isLocalPlayer) {
-				log.info("Fetching from local DB for {}", playerName);
-				items = CollectionDatabase.getItemsByCategory(bossKey);
-			} else {
-				log.info("Fetching from API for {}", playerName);
-				String json = TempleApiClient.fetchLogForChat(playerName);
+					String errorMessage = "⚠️ Failed to fetch log for " + playerName + ".";  // Use original name here
+					if (json != null && json.contains("Player has not synced"))
+					{
+						errorMessage = "⚠️ " + playerName + " has not synced their log on TempleOSRS.";  // Use original name here
+					}
 
-				if (json == null || json.isEmpty()) {
-					log.warn("No data fetched for user: {}", playerName);
+					final String finalMessage = errorMessage;
+					SwingUtilities.invokeLater(() -> {
+						chatMessageManager.queue(
+								QueuedMessage.builder()
+										.type(ChatMessageType.GAMEMESSAGE)
+										.runeLiteFormattedMessage("<col=ff6666>" + finalMessage + "</col>")
+										.build()
+						);
+					});
 					return;
 				}
 
-				CollectionDatabase.clearAll();
-				CollectionParser parser = new CollectionParser();
-				parser.parseAndStore(json);
+				if (!isLocalPlayer)
+				{
+					CollectionDatabase.pruneOldPlayers(localName, 50);
+				}
 
-				items = CollectionDatabase.getItemsByCategory(bossKey);
+				CollectionParser parser = new CollectionParser();
+				parser.parseAndStore(normalizePlayerName(playerName), json);
+			}
+			else
+			{
+				log.info("✔️ Found cached data for '{}'", normalizedPlayerName);
 			}
 
+			// Fetch the requested category
+			List<CollectionItem> items = CollectionDatabase.getItemsByCategory(normalizedPlayerName, bossKey);
 			loadItemIcons(items);
 
 			StringBuilder sb = new StringBuilder();
-			sb.append("<col=373737>")
-					.append(toTitleCase(bossKey.replace('_', ' ')))
-					.append(":</col> ");
 
-			if (items.isEmpty()) {
-				sb.append("No data found.");
-			} else {
+			// If sender's name is same as the player being queried, omit the player's name
+			if (!event.getName().equalsIgnoreCase(playerName)) {
+				sb.append("<col=373737>")
+						.append(playerName)  // Append the original player name here
+						.append("'s ");
+			}
+
+			sb.append(toTitleCase(bossKey.replace('_', ' ')))
+					.append("</col>");
+
+			if (items.isEmpty())
+			{
+				sb.append(" No data found.");
+			}
+			else
+			{
 				Map<Integer, CollectionItem> merged = new HashMap<>();
-				for (CollectionItem item : items) {
-					merged.compute(item.getItemId(), (id, existing) -> {
+				for (CollectionItem item : items)
+				{
+					merged.compute(item.getItemId(), (id, existing) ->
+					{
 						if (existing == null) return item;
 						existing.setCount(existing.getCount() + item.getCount());
 						return existing;
@@ -427,9 +477,11 @@ public class CollectionTrackerPlugin extends Plugin
 				}
 
 				int i = 0;
-				for (CollectionItem item : merged.values()) {
+				for (CollectionItem item : merged.values())
+				{
 					Integer icon = itemIconIndexes.get(item.getItemId());
-					if (icon != null) {
+					if (icon != null)
+					{
 						sb.append("<img=").append(icon).append("> ");
 					}
 					sb.append("x").append(item.getCount());
@@ -442,6 +494,28 @@ public class CollectionTrackerPlugin extends Plugin
 				client.refreshChat();
 			});
 		});
+	}
+
+
+	// Normalize player name by removing any Ironman prefixes and replacing spaces with underscores
+	private String normalizePlayerName(String playerName) {
+		String normalizedName = playerName.trim();
+
+		// Remove known Ironman prefixes
+		String[] ironmanPrefixes = {"Ironman", "Ultimate Ironman", "Hardcore Ironman"};
+		for (String prefix : ironmanPrefixes) {
+			if (normalizedName.startsWith(prefix)) {
+				normalizedName = normalizedName.replaceFirst(prefix, "").trim();
+			}
+		}
+
+		// Remove any <img=xxx> tags from the player name
+		normalizedName = normalizedName.replaceAll("<img=\\d+>", "").trim();
+
+		// Replace spaces with underscores
+		normalizedName = normalizedName.replace(' ', '_');
+
+		return normalizedName.toLowerCase();
 	}
 
 
@@ -462,10 +536,27 @@ public class CollectionTrackerPlugin extends Plugin
 		return titleCase.toString().trim();
 	}
 
+	private void showHelp() {
+		SwingUtilities.invokeLater(() -> {
+            String helpText =
+                "📜 Available Chat Commands:\n\n" +
+                "!log boss\n" +
+                "→ Shows your collection for that boss (e.g. !log vorkath)\n\n" +
+                "!log boss other_player\n" +
+                "→ Shows another player's collection (e.g. !log zulrah <player name>)\n\n" +
+                "✅ Supported aliases:\n" +
+                "- toa → tombs_of_amascut\n" +
+                "- tob → theatre_of_blood\n" +
+                "- cox → chambers_of_xeric\n" +
+                "- hydra → alchemical_hydra\n" +
+                "- sire → abyssal_sire\n" +
+                "- arma → kree_arra\n" +
+                "- kril → kril_tsutsaroth\n" +
+                "- zilyana → commander_zilyana\n" +
+                "...and more!";
 
-	@Provides
-	CollectionTrackerConfig provideConfig(ConfigManager configManager)
-	{
-		return configManager.getConfig(CollectionTrackerConfig.class);
+			panelLog(helpText);
+		});
 	}
+
 }

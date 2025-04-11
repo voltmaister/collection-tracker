@@ -3,11 +3,11 @@ package com.voltmaister.data;
 import java.sql.Timestamp;
 
 public class CollectionItem {
-    private String category;
-    private int itemId;
+    private final String category;
+    private final int itemId;
     private int count;
-    private Timestamp date;
-    private String name;
+    private final Timestamp date;
+    private final String name;
 
     public void setCount(int count) {
         this.count = count;
