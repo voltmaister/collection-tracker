@@ -24,6 +24,10 @@ dependencies {
 	testImplementation 'junit:junit:4.12'
 	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
 	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
+	testImplementation("com.h2database:h2:2.2.224")
+	testImplementation("com.google.code.gson:gson:2.10.1")
+
+
 }
 
 group = 'com.example'
