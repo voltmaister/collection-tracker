@@ -22,7 +22,9 @@ A RuneLite plugin that tracks your **Collection Log** progress and allows you to
 Once the plugin is enabled:
 
 1. Click the **Collection Tracker** icon in the RuneLite sidebar.
-2. Use the available buttons:
+2. Use the available buttons
+
+<div align="center">
 
 | Button | Function |
 |--------|----------|
@@ -30,26 +32,19 @@ Once the plugin is enabled:
 | 🔄 **Sync Collection Log** | Sync your data with TempleOSRS |
 | ❓ **Show Commands** | See how to use chat commands |
 
-<div align="center">
-  <img src="docs/Screenshot_1.png" width="280"/>
-</div>
+<br>
 
-#### 🔁 Syncing the Collection Log
+### 🖼️ Panel Previews
 
-<div align="center">
-  <img src="docs/Screenshot_3.png" width="280"/>
-</div>
+<table>
+  <tr>
+    <td align="center"><strong>📦 Main Panel</strong><br><img src="docs/Screenshot_1.png" width="160"/></td>
+    <td align="center"><strong>🔄 Sync</strong><br><img src="docs/Screenshot_3.png" width="160"/></td>
+    <td align="center"><strong>📋 View Items</strong><br><img src="docs/Screenshot_4.png" width="160"/></td>
+    <td align="center"><strong>❓ Commands</strong><br><img src="docs/Screenshot_2.png" width="160"/></td>
+  </tr>
+</table>
 
-#### 📄 Viewing Stored Items
-
-<div align="center">
-  <img src="docs/Screenshot_4.png" width="280"/>
-</div>
-
-#### ❓ Viewing Command Help
-
-<div align="center">
-  <img src="docs/Screenshot_2.png" width="280"/>
 </div>
 
 ---
@@ -105,7 +100,7 @@ No additional configuration needed. Just install and go.
 
 - Inspired by the original OSRS Collection Log and TempleOSRS API
 - Built using the RuneLite plugin API
-- Created by [Voltmaister]
+- Created by [Voltmaister](https://github.com/Voltmaister)
 
 ---
 
