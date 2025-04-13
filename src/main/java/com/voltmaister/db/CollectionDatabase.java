@@ -128,6 +128,20 @@ public class CollectionDatabase {
         return items;
     }
 
+    public static Timestamp getLatestTimestamp(String playerName) {
+        String sql = "SELECT MAX(collected_date) FROM collection_log WHERE player_name = ?";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, playerName.toLowerCase());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getTimestamp(1);
+            }
+        } catch (SQLException e) {
+            log.severe("Error fetching latest timestamp: " + e.getMessage());
+        }
+        return null;
+    }
+
 
     public static void clearAll() {
         try (Connection conn = getConnection();

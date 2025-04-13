@@ -1,7 +1,13 @@
 package com.voltmaister.api;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.logging.Logger;
@@ -43,6 +49,49 @@ public class TempleApiClient {
             return null;
         }
     }
+
+    public static String getLastChanged(String username) {
+        try {
+            String urlString = "https://templeosrs.com/api/player_info.php?player=" + username;
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+
+            String response = readResponse(conn);
+
+            logger.info("📨 Raw last_changed response for " + username + ": " + response);
+
+
+            if (response == null || response.isEmpty()) {
+                logger.warning("Empty last_changed response for: " + username);
+                return null;
+            }
+
+            // 👇 Use JsonReader in lenient mode
+            JsonReader reader = new JsonReader(new StringReader(response));
+            reader.setLenient(true);
+
+            JsonElement element = new JsonParser().parse(reader);
+            if (element.isJsonObject()) {
+                JsonObject root = element.getAsJsonObject();
+
+                if (root.has("data")) {
+                    JsonObject data = root.getAsJsonObject("data");
+
+                    if (data.has("Last changed")) {
+                        String lastChanged = data.get("Last changed").getAsString();
+                        logger.info("📡 Parsed 'Last changed' for " + username + ": " + lastChanged);
+                        return lastChanged;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.severe("❌ Failed to get last_changed for " + username + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+
 
     private static String readResponse(HttpURLConnection conn) throws Exception {
         BufferedReader in;

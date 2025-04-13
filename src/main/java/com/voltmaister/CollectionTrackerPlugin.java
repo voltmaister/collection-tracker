@@ -3,6 +3,7 @@ package com.voltmaister;
 // Standard Java imports
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -13,8 +14,12 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 // External library imports
+import com.google.inject.Provides;
+import com.voltmaister.config.CollectionTrackerConfig;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.chat.QueuedMessage;
+import net.runelite.client.config.ConfigManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +65,7 @@ public class CollectionTrackerPlugin extends Plugin
 	@Inject private ChatMessageManager chatMessageManager;
 	@Inject private ClientToolbar clientToolbar;
 	@Inject private Client client;
+	@Inject private CollectionTrackerConfig config;
 
 	private NavigationButton navButton;
 	private PluginPanel panel;
@@ -258,6 +264,17 @@ public class CollectionTrackerPlugin extends Plugin
 		});
 	}
 
+	public static boolean isDataOutdated(String username, String lastChangedFromApi) {
+		if (lastChangedFromApi == null) return true;
+
+		Timestamp dbTimestamp = CollectionDatabase.getLatestTimestamp(username);
+		Timestamp apiTimestamp = Timestamp.valueOf(lastChangedFromApi);
+
+		return dbTimestamp == null || dbTimestamp.before(apiTimestamp);
+	}
+
+
+
 	private void printCollectionForCategory(String category)
 	{
 		Executors.newSingleThreadExecutor().execute(() -> {
@@ -402,7 +419,17 @@ public class CollectionTrackerPlugin extends Plugin
 
 		Executors.newSingleThreadExecutor().execute(() ->
 		{
-			if (!CollectionDatabase.hasPlayerData(normalizedPlayerName))
+			String lastChanged = TempleApiClient.getLastChanged(normalizedPlayerName);
+			Timestamp dbTimestamp = CollectionDatabase.getLatestTimestamp(normalizedPlayerName);
+			Timestamp apiTimestamp = lastChanged != null ? Timestamp.valueOf(lastChanged) : null;
+
+			log.info("🕒 [Compare] {} | DB: {} | API: {}", normalizedPlayerName, dbTimestamp, apiTimestamp);
+
+			boolean hasLocalData = CollectionDatabase.hasPlayerData(normalizedPlayerName);
+			boolean shouldUpdate = !hasLocalData || (apiTimestamp != null && (dbTimestamp == null || dbTimestamp.before(apiTimestamp)));
+
+
+			if (shouldUpdate)
 			{
 				log.info("📭 No local data for '{}', fetching from API...", normalizedPlayerName);
 				String json = TempleApiClient.fetchLogForChat(normalizedPlayerName);
@@ -432,7 +459,7 @@ public class CollectionTrackerPlugin extends Plugin
 
 				if (!isLocalPlayer)
 				{
-					CollectionDatabase.pruneOldPlayers(localName, 50);
+					CollectionDatabase.pruneOldPlayers(localName, config.maxCachedPlayers());
 				}
 
 				CollectionParser parser = new CollectionParser();
@@ -557,6 +584,12 @@ public class CollectionTrackerPlugin extends Plugin
 
 			panelLog(helpText);
 		});
+	}
+
+	@Provides
+	public CollectionTrackerConfig provideConfig(ConfigManager configManager)
+	{
+		return configManager.getConfig(CollectionTrackerConfig.class);
 	}
 
 }
