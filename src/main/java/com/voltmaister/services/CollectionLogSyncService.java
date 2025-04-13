@@ -49,7 +49,8 @@ public class CollectionLogSyncService {
             }
 
             log.info("🧩 Parsing and storing JSON...");
-            CollectionParser parser = new CollectionParser();
+            CollectionParser parser = new CollectionParser(TempleApiClient.getGson());
+
             parser.parseAndStore(PlayerNameUtils.normalizePlayerName(username), json);
             log.info("✅ Parsing complete.");
 

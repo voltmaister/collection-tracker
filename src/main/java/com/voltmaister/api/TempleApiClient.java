@@ -24,6 +24,10 @@ public class TempleApiClient {
         TempleApiClient.gson = injectedGson;
     }
 
+    public static Gson getGson() {
+        return gson;
+    }
+
     public static String fetchLog(String username) {
         return fetchLog(username, true);
     }

@@ -16,7 +16,12 @@ import org.slf4j.LoggerFactory;
 public class CollectionParser {
 
     private static final Logger log = LoggerFactory.getLogger(CollectionParser.class);
-    private final Gson gson = new Gson();
+
+    private final Gson gson;
+
+    public CollectionParser(Gson gson) {
+        this.gson = gson;
+    }
 
     public void parseAndStore(String username, String json) {
         username = username.toLowerCase();

@@ -389,7 +389,7 @@ public class CollectionTrackerPlugin extends Plugin
 					CollectionDatabase.pruneOldPlayers(localName, config.maxCachedPlayers());
 				}
 
-				CollectionParser parser = new CollectionParser();
+				CollectionParser parser = new CollectionParser(TempleApiClient.getGson());
 				parser.parseAndStore(PlayerNameUtils.normalizePlayerName(playerName), json);
 			}
 			else
