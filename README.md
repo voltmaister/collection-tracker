@@ -63,7 +63,7 @@ _Example: `!log vorkath`_
 ```text
 !log boss playername
 ```
-_Example: `!log zulrah hey jase`_
+_Example: `!log zulrah player name`_
 
 #### 🔀 Supported Aliases
 Commands like `toa`, `tob`, `arma`, `graardor`, `vetion`, etc. are smart-mapped to their full names.
