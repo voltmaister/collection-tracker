@@ -98,7 +98,7 @@ No additional configuration needed. Just install and go.
 
 ## 🤝 Credits
 
-- Inspired by the original OSRS Collection Log and TempleOSRS API
+- Inspired by the original OSRS [Collection Log by evansloan](https://github.com/evansloan/collection-log) and [TempleOSRS API](https://templeosrs.com/api_doc.php)
 - Built using the RuneLite plugin API
 - Created by [Voltmaister](https://github.com/Voltmaister)
 
