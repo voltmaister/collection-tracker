@@ -52,7 +52,7 @@ public class TempleApiClient {
 
     public static String getLastChanged(String username) {
         try {
-            String urlString = "https://templeosrs.com/api/player_info.php?player=" + username;
+            String urlString = "https://templeosrs.com/api/player_info.php?player=" + username +"&cloginfo=1";
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
@@ -76,9 +76,12 @@ public class TempleApiClient {
                 if (root.has("data")) {
                     JsonObject data = root.getAsJsonObject("data");
 
-                    if (data.has("Last changed")) {
-                        String lastChanged = data.get("Last changed").getAsString();
-                        return lastChanged;
+                    if (data.has("collection_log")) {
+                        JsonObject collectionLog = data.getAsJsonObject("collection_log");
+
+                        if (collectionLog.has("last_changed")) {
+                            return collectionLog.get("last_changed").getAsString();
+                        }
                     }
                 }
             }
