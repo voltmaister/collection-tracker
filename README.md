@@ -105,5 +105,4 @@ No additional configuration needed. Just install and go.
 ---
 
 ## 📄 License
-
-MIT – Free to use, modify, and share ❤️
+BSD 2-Clause LICENSE
