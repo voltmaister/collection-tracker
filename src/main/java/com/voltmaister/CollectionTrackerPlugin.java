@@ -14,6 +14,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 // External library imports
+import com.google.gson.Gson;
 import com.google.inject.Provides;
 import com.voltmaister.config.CollectionTrackerConfig;
 import net.runelite.client.chat.ChatMessageManager;
@@ -68,6 +69,7 @@ public class CollectionTrackerPlugin extends Plugin
 	@Inject private ClientToolbar clientToolbar;
 	@Inject private Client client;
 	@Inject private CollectionTrackerConfig config;
+	@Inject private Gson gson;
 
 	private NavigationButton navButton;
 	private PluginPanel panel;
@@ -87,6 +89,9 @@ public class CollectionTrackerPlugin extends Plugin
 
 	@Override
 	protected void startUp() throws Exception {
+
+		TempleApiClient.setGson(gson);
+
 		log.info("Collection Tracker started!");
 
 		CollectionDatabase.init();
