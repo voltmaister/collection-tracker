@@ -59,8 +59,6 @@ public class TempleApiClient {
 
             String response = readResponse(conn);
 
-            logger.info("📨 Raw last_changed response for " + username + ": " + response);
-
 
             if (response == null || response.isEmpty()) {
                 logger.warning("Empty last_changed response for: " + username);
@@ -80,7 +78,6 @@ public class TempleApiClient {
 
                     if (data.has("Last changed")) {
                         String lastChanged = data.get("Last changed").getAsString();
-                        logger.info("📡 Parsed 'Last changed' for " + username + ": " + lastChanged);
                         return lastChanged;
                     }
                 }

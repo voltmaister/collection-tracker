@@ -16,7 +16,6 @@ import javax.swing.border.EmptyBorder;
 // External library imports
 import com.google.inject.Provides;
 import com.voltmaister.config.CollectionTrackerConfig;
-import net.runelite.client.callback.ClientThread;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.config.ConfigManager;
@@ -46,8 +45,11 @@ import com.voltmaister.api.TempleApiClient;
 import com.voltmaister.data.CollectionItem;
 import com.voltmaister.db.CollectionDatabase;
 import com.voltmaister.parser.CollectionParser;
-
-
+import com.voltmaister.utils.LoadIcon;
+import com.voltmaister.utils.CategoryAliases;
+import com.voltmaister.utils.PlayerNameUtils;
+import com.voltmaister.utils.HelpMessageUtils;
+import com.voltmaister.services.CollectionLogSyncService;
 
 
 
@@ -78,22 +80,10 @@ public class CollectionTrackerPlugin extends Plugin
 
 	private int count;
 
-	private final BufferedImage icon = loadIcon();
+	private final BufferedImage icon = LoadIcon.loadIcon();
 	private final Set<Integer> loadedItemIds = new HashSet<>();
 
-	private BufferedImage loadIcon() {
-		try {
-			return ImageUtil.loadImageResource(getClass(), "/Collection_log.png");
-		} catch (Exception e) {
-			log.warn("Using fallback icon", e);
-			BufferedImage fallback = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-			Graphics2D g = fallback.createGraphics();
-			g.setColor(Color.RED);
-			g.fillRect(0, 0, 16, 16);
-			g.dispose();
-			return fallback;
-		}
-	}
+
 
 	@Override
 	protected void startUp() throws Exception {
@@ -135,7 +125,7 @@ public class CollectionTrackerPlugin extends Plugin
 		syncButton.setMaximumSize(new Dimension(200, 30));
 		syncButton.setMargin(new Insets(5, 10, 5, 10));
 		syncButton.setFocusable(false);
-		syncButton.addActionListener(e -> syncCollectionLog());
+		syncButton.addActionListener(e -> CollectionLogSyncService.syncCollectionLog(client, this::panelLog));
 		buttonPanel.add(syncButton);
 		buttonPanel.add(Box.createVerticalStrut(8));
 
@@ -144,7 +134,7 @@ public class CollectionTrackerPlugin extends Plugin
 		helpButton.setMaximumSize(new Dimension(200, 30));
 		helpButton.setMargin(new Insets(5, 10, 5, 10));
 		helpButton.setFocusable(false);
-		helpButton.addActionListener(e -> showHelp());
+		helpButton.addActionListener(e -> panelLog(HelpMessageUtils.getHelpMessage()));
 		buttonPanel.add(helpButton);
 
 
@@ -240,7 +230,7 @@ public class CollectionTrackerPlugin extends Plugin
 	{
 		Executors.newSingleThreadExecutor().execute(() -> {
 			String playerName = client.getLocalPlayer() != null
-					? normalizePlayerName(Objects.requireNonNull(client.getLocalPlayer().getName()))
+					? PlayerNameUtils.normalizePlayerName(Objects.requireNonNull(client.getLocalPlayer().getName()))
 					: "";
 			List<CollectionItem> items = CollectionDatabase.getAllItems(playerName);
 
@@ -300,76 +290,8 @@ public class CollectionTrackerPlugin extends Plugin
 		});
 	}
 
-	private void syncCollectionLog()
-	{
-		Executors.newSingleThreadExecutor().execute(() -> {
-			log.info("🔄 Starting syncCollectionLog()...");
 
-			CollectionDatabase.init();
-			CollectionDatabase.clearAll();
 
-			if (client.getLocalPlayer() == null) {
-				log.warn("⚠️ Local player is null — not logged in yet.");
-				SwingUtilities.invokeLater(() ->
-						panelLog("⚠️ Cannot sync — you're not logged in yet.")
-				);
-				return;
-			}
-
-			String username = client.getLocalPlayer().getName().toLowerCase();
-			log.info("👤 Detected username: {}", username);
-
-			SwingUtilities.invokeLater(() ->
-					panelLog("📡 Fetching collection log for " + username + "...")
-			);
-
-			String json = TempleApiClient.fetchLog(username);
-			log.info("📥 Fetched JSON: {} characters", json != null ? json.length() : 0);
-
-			if (json == null || json.isEmpty()) {
-				log.error("❌ Empty or null response from Temple API");
-				SwingUtilities.invokeLater(() ->
-						panelLog("❌ Failed to fetch collection log for " + username)
-				);
-				return;
-			}
-
-			log.info("🧩 Parsing and storing JSON...");
-			CollectionParser parser = new CollectionParser();
-			parser.parseAndStore(normalizePlayerName(username), json);
-			log.info("✅ Parsing complete.");
-
-			SwingUtilities.invokeLater(() ->
-					panelLog("✅ Successfully synced collection log for " + username)
-			);
-		});
-	}
-
-	private static final Map<String, String> CATEGORY_ALIASES = Map.ofEntries(
-			Map.entry("artio", "callisto_and_artio"),
-			Map.entry("callisto", "callisto_and_artio"),
-			Map.entry("spindel", "venenatis_and_spindel"),
-			Map.entry("venenatis", "venenatis_and_spindel"),
-			Map.entry("vetion", "vetion_and_calvarion"),
-			Map.entry("calvarion", "vetion_and_calvarion"),
-			Map.entry("sire", "abyssal_sire"),
-			Map.entry("hydra", "alchemical_hydra"),
-			Map.entry("zilyana", "commander_zilyana"),
-			Map.entry("graardor", "general_graardor"),
-			Map.entry("kril", "kril_tsutsaroth"),
-			Map.entry("tsutsaroth", "kril_tsutsaroth"),
-			Map.entry("arma", "kree_arra"),
-			Map.entry("kree", "kree_arra"),
-			Map.entry("muspah", "phantom_muspah"),
-			Map.entry("toa", "tombs_of_amascut"),
-			Map.entry("tob", "theatre_of_blood"),
-			Map.entry("cox", "chambers_of_xeric"),
-			Map.entry("gauntlet", "the_gauntlet"),
-			Map.entry("fightcaves", "the_fight_caves"),
-			Map.entry("inferno", "the_inferno"),
-			Map.entry("whisperer", "the_whisperer")
-			// Add more as needed
-	);
 
 
 	@Subscribe
@@ -409,11 +331,11 @@ public class CollectionTrackerPlugin extends Plugin
 
 		// Normalize boss name
 		String bossInput = parts[0].trim().replace(' ', '_');
-		String bossKey = CATEGORY_ALIASES.getOrDefault(bossInput.toLowerCase(), bossInput.toLowerCase());
+		String bossKey = CategoryAliases.CATEGORY_ALIASES.getOrDefault(bossInput.toLowerCase(), bossInput.toLowerCase());
 
 		// Determine target player (specified or sender)
 		String playerName = (parts.length == 2) ? parts[1].trim() : event.getName();
-		String normalizedPlayerName = normalizePlayerName(playerName);  // Normalize the player name for the API call
+		String normalizedPlayerName = PlayerNameUtils.normalizePlayerName(playerName);  // Normalize the player name for the API call
 		String localName = client.getLocalPlayer() != null ? client.getLocalPlayer().getName() : "";
 		boolean isLocalPlayer = normalizedPlayerName.equalsIgnoreCase(localName);
 
@@ -463,7 +385,7 @@ public class CollectionTrackerPlugin extends Plugin
 				}
 
 				CollectionParser parser = new CollectionParser();
-				parser.parseAndStore(normalizePlayerName(playerName), json);
+				parser.parseAndStore(PlayerNameUtils.normalizePlayerName(playerName), json);
 			}
 			else
 			{
@@ -524,27 +446,6 @@ public class CollectionTrackerPlugin extends Plugin
 	}
 
 
-	// Normalize player name by removing any Ironman prefixes and replacing spaces with underscores
-	private String normalizePlayerName(String playerName) {
-		String normalizedName = playerName.trim();
-
-		// Remove known Ironman prefixes
-		String[] ironmanPrefixes = {"Ironman", "Ultimate Ironman", "Hardcore Ironman"};
-		for (String prefix : ironmanPrefixes) {
-			if (normalizedName.startsWith(prefix)) {
-				normalizedName = normalizedName.replaceFirst(prefix, "").trim();
-			}
-		}
-
-		// Remove any <img=xxx> tags from the player name
-		normalizedName = normalizedName.replaceAll("<img=\\d+>", "").trim();
-
-		// Replace spaces with underscores
-		normalizedName = normalizedName.replace(' ', '_');
-
-		return normalizedName.toLowerCase();
-	}
-
 
 	private String toTitleCase(String input) {
 		if (input == null || input.isEmpty()) return input;
@@ -563,28 +464,6 @@ public class CollectionTrackerPlugin extends Plugin
 		return titleCase.toString().trim();
 	}
 
-	private void showHelp() {
-		SwingUtilities.invokeLater(() -> {
-            String helpText =
-                "📜 Available Chat Commands:\n\n" +
-                "!log boss\n" +
-                "→ Shows your collection for that boss (e.g. !log vorkath)\n\n" +
-                "!log boss other_player\n" +
-                "→ Shows another player's collection (e.g. !log zulrah <player name>)\n\n" +
-                "✅ Supported aliases:\n" +
-                "- toa → tombs_of_amascut\n" +
-                "- tob → theatre_of_blood\n" +
-                "- cox → chambers_of_xeric\n" +
-                "- hydra → alchemical_hydra\n" +
-                "- sire → abyssal_sire\n" +
-                "- arma → kree_arra\n" +
-                "- kril → kril_tsutsaroth\n" +
-                "- zilyana → commander_zilyana\n" +
-                "...and more!";
-
-			panelLog(helpText);
-		});
-	}
 
 	@Provides
 	public CollectionTrackerConfig provideConfig(ConfigManager configManager)
