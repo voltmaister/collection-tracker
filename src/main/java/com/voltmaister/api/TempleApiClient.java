@@ -34,6 +34,7 @@ public class TempleApiClient {
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
+            conn.setRequestProperty("User-Agent", "CollectionTrackerPlugin/1.0 RuneLite");
 
             String response = readResponse(conn);
 
@@ -56,6 +57,7 @@ public class TempleApiClient {
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
+            conn.setRequestProperty("User-Agent", "CollectionTrackerPlugin/1.0 RuneLite");
 
             String response = readResponse(conn);
 
