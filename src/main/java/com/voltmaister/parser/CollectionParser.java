@@ -25,7 +25,7 @@ public class CollectionParser {
 
     public void parseAndStore(String username, String json) {
         username = username.toLowerCase();
-        log.info("🧹 Starting parseAndStore() for user: {}...", username);
+        log.debug("🧹 Starting parseAndStore() for user: {}...", username);
 
         JsonElement root;
 
@@ -81,7 +81,7 @@ public class CollectionParser {
                 String categoryName = category.getKey();
                 JsonArray itemArray = category.getValue().getAsJsonArray();
 
-                log.info("📦 Parsing category: {} ({} items)", categoryName, itemArray.size());
+                log.debug("📦 Parsing category: {} ({} items)", categoryName, itemArray.size());
                 categoryCount++;
 
                 List<CollectionResponse.ItemEntry> entryList = new ArrayList<>();
@@ -97,13 +97,13 @@ public class CollectionParser {
                 CollectionDatabase.insertItemsBatch(username.toLowerCase(), categoryName, entryList);
             }
 
-            log.info("✅ Parsed {} categories and inserted {} items total for {}.", categoryCount, itemCount, username);
+            log.debug("✅ Parsed {} categories and inserted {} items total for {}.", categoryCount, itemCount, username);
 
             // ✅ Manually shut down the database after insert
             try (Connection conn = CollectionDatabase.getConnection();
                  Statement stmt = conn.createStatement()) {
                 stmt.execute("SHUTDOWN");
-                log.info("🚗 Manually closed H2 database after sync.");
+                log.debug("🚗 Manually closed H2 database after sync.");
             } catch (SQLException e) {
                 log.error("⚠️ Error while trying to shut down the database", e);
             }

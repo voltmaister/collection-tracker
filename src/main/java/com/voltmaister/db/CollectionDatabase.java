@@ -6,10 +6,11 @@ import com.voltmaister.data.CollectionResponse;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CollectionDatabase {
-    private static final Logger log = Logger.getLogger(CollectionDatabase.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(CollectionDatabase.class);
 
     private static final String DB_URL = "jdbc:h2:file:./runelite-collections;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1";
 
@@ -18,23 +19,30 @@ public class CollectionDatabase {
     }
 
     public static void init() {
-        try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS collection_log(" +
-                    "id IDENTITY PRIMARY KEY, " +
-                    "category VARCHAR(255), " +
-                    "item_id INT, " +
-                    "item_count INT, " +
-                    "item_name VARCHAR(255)," +
-                    "collected_date TIMESTAMP" +
-                    ")");
+        try {
+            // 🚨 Required for Plugin Hub: explicitly load the H2 JDBC driver
+            Class.forName("org.h2.Driver");
 
-            addColumnIfNotExists(conn, "collection_log", "player_name", "VARCHAR(255)");
-            addColumnIfNotExists(conn, "collection_log", "last_accessed", "TIMESTAMP");
+            try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
+                stmt.executeUpdate("CREATE TABLE IF NOT EXISTS collection_log(" +
+                        "id IDENTITY PRIMARY KEY, " +
+                        "category VARCHAR(255), " +
+                        "item_id INT, " +
+                        "item_count INT, " +
+                        "item_name VARCHAR(255)," +
+                        "collected_date TIMESTAMP" +
+                        ")");
 
+                addColumnIfNotExists(conn, "collection_log", "player_name", "VARCHAR(255)");
+                addColumnIfNotExists(conn, "collection_log", "last_accessed", "TIMESTAMP");
+            }
+        } catch (ClassNotFoundException e) {
+            log.warn("H2 Driver class not found: " + e.getMessage());
         } catch (SQLException e) {
-            log.severe("Database initialization failed: " + e.getMessage());
+            log.warn("Database initialization failed: " + e.getMessage());
         }
     }
+
 
     private static void addColumnIfNotExists(Connection conn, String table, String column, String type) throws SQLException {
         String checkQuery = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?";
@@ -58,7 +66,7 @@ public class CollectionDatabase {
             ResultSet rs = ps.executeQuery();
             return rs.next();
         } catch (SQLException e) {
-            log.severe("Error checking player data: " + e.getMessage());
+            log.warn("Error checking player data: " + e.getMessage());
             return false;
         }
     }
@@ -82,7 +90,7 @@ public class CollectionDatabase {
             }
             conn.commit();
         } catch (SQLException e) {
-            log.severe("Error inserting items batch: " + e.getMessage());
+            log.warn("Error inserting items batch: " + e.getMessage());
         }
     }
 
@@ -98,7 +106,7 @@ public class CollectionDatabase {
             ps.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             ps.executeUpdate();
         } catch (SQLException e) {
-            log.severe("Error inserting item: " + e.getMessage());
+            log.warn("Error inserting item: " + e.getMessage());
         }
     }
 
@@ -122,7 +130,7 @@ public class CollectionDatabase {
                 items.add(new CollectionItem(category, itemId, name, count, date));
             }
         } catch (SQLException e) {
-            log.severe("Error fetching items for player: " + e.getMessage());
+            log.warn("Error fetching items for player: " + e.getMessage());
         }
 
         return items;
@@ -137,7 +145,7 @@ public class CollectionDatabase {
                 return rs.getTimestamp(1);
             }
         } catch (SQLException e) {
-            log.severe("Error fetching latest timestamp: " + e.getMessage());
+            log.warn("Error fetching latest timestamp: " + e.getMessage());
         }
         return null;
     }
@@ -148,7 +156,7 @@ public class CollectionDatabase {
              Statement stmt = conn.createStatement()) {
             stmt.executeUpdate("DELETE FROM collection_log");
         } catch (SQLException e) {
-            log.severe("Error clearing all items: " + e.getMessage());
+            log.warn("Error clearing all items: " + e.getMessage());
         }
     }
 
@@ -171,7 +179,7 @@ public class CollectionDatabase {
                 }
             }
         } catch (SQLException e) {
-            log.severe("Error fetching items by category: " + e.getMessage());
+            log.warn("Error fetching items by category: " + e.getMessage());
         }
 
         return items;
@@ -204,12 +212,12 @@ public class CollectionDatabase {
             }
 
             for (String name : playersToRemove) {
-                log.info("🧹 Pruning cached player: " + name);
+                log.debug("🧹 Pruning cached player: " + name);
                 deleteStmt.setString(1, name);
                 deleteStmt.executeUpdate();
             }
         } catch (SQLException e) {
-            log.severe("Error pruning old players: " + e.getMessage());
+            log.warn("Error pruning old players: " + e.getMessage());
         }
     }
 }

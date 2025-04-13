@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 // Java Swing imports
@@ -39,6 +40,7 @@ import net.runelite.api.ChatMessageType;
 import net.runelite.client.game.ItemManager;
 import net.runelite.api.IndexedSprite;
 import net.runelite.client.util.AsyncBufferedImage;
+import okhttp3.OkHttpClient;
 
 
 // Project-specific imports
@@ -70,6 +72,7 @@ public class CollectionTrackerPlugin extends Plugin
 	@Inject private Client client;
 	@Inject private CollectionTrackerConfig config;
 	@Inject private Gson gson;
+	@Inject private OkHttpClient okHttpClient;
 
 	private NavigationButton navButton;
 	private PluginPanel panel;
@@ -85,14 +88,17 @@ public class CollectionTrackerPlugin extends Plugin
 	private final BufferedImage icon = LoadIcon.loadIcon();
 	private final Set<Integer> loadedItemIds = new HashSet<>();
 
+	private final ExecutorService executor = Executors.newSingleThreadExecutor();
+
 
 
 	@Override
 	protected void startUp() throws Exception {
 
 		TempleApiClient.setGson(gson);
+		TempleApiClient.setHttpClient(okHttpClient);
 
-		log.info("Collection Tracker started!");
+		log.debug("Collection Tracker started!");
 
 		CollectionDatabase.init();
 
@@ -186,8 +192,9 @@ public class CollectionTrackerPlugin extends Plugin
 		// 🧼 Clear cached icons and IDs to prevent memory buildup
 		itemIconIndexes.clear();
 		loadedItemIds.clear();
+		executor.shutdown();
 
-		log.info("Collection Tracker stopped!");
+		log.debug("Collection Tracker stopped!");
 	}
 
 	private void panelLog(String message) {
@@ -233,7 +240,7 @@ public class CollectionTrackerPlugin extends Plugin
 
 	private void printAllCollections()
 	{
-		Executors.newSingleThreadExecutor().execute(() -> {
+		executor.execute(() -> {
 			String playerName = client.getLocalPlayer() != null
 					? PlayerNameUtils.normalizePlayerName(Objects.requireNonNull(client.getLocalPlayer().getName()))
 					: "";
@@ -272,7 +279,7 @@ public class CollectionTrackerPlugin extends Plugin
 
 	private void printCollectionForCategory(String category)
 	{
-		Executors.newSingleThreadExecutor().execute(() -> {
+		executor.execute(() -> {
 			String playerName = client.getLocalPlayer().getName(); // ✅ declare properly
 			List<CollectionItem> items = CollectionDatabase.getItemsByCategory(playerName.toLowerCase(), category); // ✅ pass it
 
@@ -344,13 +351,13 @@ public class CollectionTrackerPlugin extends Plugin
 		String localName = client.getLocalPlayer() != null ? client.getLocalPlayer().getName() : "";
 		boolean isLocalPlayer = normalizedPlayerName.equalsIgnoreCase(localName);
 
-		Executors.newSingleThreadExecutor().execute(() ->
+		executor.execute(() ->
 		{
 			String lastChanged = TempleApiClient.getLastChanged(normalizedPlayerName);
 			Timestamp dbTimestamp = CollectionDatabase.getLatestTimestamp(normalizedPlayerName);
 			Timestamp apiTimestamp = lastChanged != null ? Timestamp.valueOf(lastChanged) : null;
 
-			log.info("🕒 [Compare] {} | DB: {} | API: {}", normalizedPlayerName, dbTimestamp, apiTimestamp);
+			log.debug("🕒 [Compare] {} | DB: {} | API: {}", normalizedPlayerName, dbTimestamp, apiTimestamp);
 
 			boolean hasLocalData = CollectionDatabase.hasPlayerData(normalizedPlayerName);
 			boolean shouldUpdate = !hasLocalData || (apiTimestamp != null && (dbTimestamp == null || dbTimestamp.before(apiTimestamp)));
@@ -358,7 +365,7 @@ public class CollectionTrackerPlugin extends Plugin
 
 			if (shouldUpdate)
 			{
-				log.info("📭 No local data for '{}', fetching from API...", normalizedPlayerName);
+				log.debug("📭 No local data for '{}', fetching from API...", normalizedPlayerName);
 				String json = TempleApiClient.fetchLogForChat(normalizedPlayerName);
 
 				// Handle empty or failed fetch
@@ -394,7 +401,7 @@ public class CollectionTrackerPlugin extends Plugin
 			}
 			else
 			{
-				log.info("✔️ Found cached data for '{}'", normalizedPlayerName);
+				log.debug("✔️ Found cached data for '{}'", normalizedPlayerName);
 			}
 
 			// Fetch the requested category
