@@ -10,7 +10,7 @@ A RuneLite plugin that tracks your **Collection Log** progress and allows you to
 - 🧾 **Print all your collected items** to the plugin side panel
 - 🔍 **Query other players' collection logs** using in-game chat commands
 - 🧠 **Smart aliasing** for common boss and minigame names  
-  _e.g. `!log TOA` works for "Tombs of Amascut"_
+  _e.g. `!col TOA` works for "Tombs of Amascut"_
 - 📀 **Local database caching** with pruning to keep it clean and fast
 
 ---
@@ -55,15 +55,15 @@ Use these in public, private, or clan chat:
 
 #### View Your Collection
 ```text
-!log boss
+!col boss
 ```
-_Example: `!log vorkath`_
+_Example: `!col vorkath`_
 
 #### View Another Player's Collection
 ```text
-!log boss playername
+!col boss playername
 ```
-_Example: `!log zulrah player name`_
+_Example: `!col zulrah player name`_
 
 #### 🔀 Supported Aliases
 Commands like `toa`, `tob`, `arma`, `graardor`, `vetion`, etc. are smart-mapped to their full names.

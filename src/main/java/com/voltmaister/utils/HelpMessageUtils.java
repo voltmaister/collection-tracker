@@ -5,10 +5,10 @@ public class HelpMessageUtils {
     public static String getHelpMessage() {
         return
                 "📜 Available Chat Commands:\n\n" +
-                        "!log boss\n" +
-                        "→ Shows your collection for that boss (e.g. !log vorkath)\n\n" +
-                        "!log boss other_player\n" +
-                        "→ Shows another player's collection (e.g. !log zulrah <player name>)\n\n" +
+                        "!col boss\n" +
+                        "→ Shows your collection for that boss (e.g. !col vorkath)\n\n" +
+                        "!col boss other_player\n" +
+                        "→ Shows another player's collection (e.g. !col zulrah <player name>)\n\n" +
                         "✅ Supported aliases:\n" +
                         "- toa → tombs_of_amascut\n" +
                         "- tob → theatre_of_blood\n" +

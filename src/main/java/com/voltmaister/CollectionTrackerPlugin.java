@@ -331,8 +331,8 @@ public class CollectionTrackerPlugin extends Plugin
 			return;
 		}
 
-		// Command must start with "!log "
-		if (!rawMessage.toLowerCase().startsWith("!log "))
+		// Command must start with "!col "
+		if (!rawMessage.toLowerCase().startsWith("!col "))
 		{
 			return;
 		}
