@@ -24,14 +24,13 @@ dependencies {
 	testImplementation 'junit:junit:4.12'
 	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
 	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
-	testImplementation("com.h2database:h2:2.2.224")
-	testImplementation("com.google.code.gson:gson:2.10.1")
 
-
+	// Required for local database storage (used at runtime)
+	implementation("com.h2database:h2:2.1.212")
 }
 
-group = 'com.example'
-version = '1.0-SNAPSHOT'
+group = 'com.voltmaister'
+version = '1.0'
 
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = 'UTF-8'
