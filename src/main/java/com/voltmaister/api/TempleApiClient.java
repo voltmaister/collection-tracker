@@ -9,11 +9,12 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 import java.io.StringReader;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TempleApiClient {
 
-    private static final Logger logger = Logger.getLogger(TempleApiClient.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(TempleApiClient.class);
     private static final String BASE_URL = "https://templeosrs.com/api/collection-log/player_collection_log.php";
     private static Gson gson;
     private static OkHttpClient httpClient;
@@ -51,7 +52,7 @@ public class TempleApiClient {
 
             try (Response response = httpClient.newCall(request).execute()) {
                 if (!response.isSuccessful()) {
-                    logger.warning("HTTP error fetching collection log for " + username + ": " + response.code());
+                    log.warn("HTTP error fetching collection log for " + username + ": " + response.code());
                     return null;
                 }
 
@@ -64,7 +65,7 @@ public class TempleApiClient {
                 return body;
             }
         } catch (Exception e) {
-            logger.severe("❌ Exception while fetching log for " + username + ": " + e.getMessage());
+            log.error("❌ Exception while fetching log for " + username + ": " + e.getMessage());
             return null;
         }
     }
@@ -80,14 +81,14 @@ public class TempleApiClient {
 
             try (Response response = httpClient.newCall(request).execute()) {
                 if (!response.isSuccessful()) {
-                    logger.warning("HTTP error fetching last_changed for " + username + ": " + response.code());
+                    log.warn("HTTP error fetching last_changed for " + username + ": " + response.code());
                     return null;
                 }
 
                 String body = response.body().string();
 
                 if (body == null || body.isEmpty()) {
-                    logger.warning("Empty response body when fetching last_changed for: " + username);
+                    log.warn("Empty response body when fetching last_changed for: " + username);
                     return null;
                 }
 
@@ -113,7 +114,7 @@ public class TempleApiClient {
                 }
             }
         } catch (Exception e) {
-            logger.severe("❌ Failed to get last_changed for " + username + ": " + e.getMessage());
+            log.error("❌ Failed to get last_changed for " + username + ": " + e.getMessage());
         }
         return null;
     }
