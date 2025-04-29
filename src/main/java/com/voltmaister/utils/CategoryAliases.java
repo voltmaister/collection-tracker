@@ -25,7 +25,11 @@ public class CategoryAliases {
             Map.entry("gauntlet", "the_gauntlet"),
             Map.entry("fightcaves", "the_fight_caves"),
             Map.entry("inferno", "the_inferno"),
-            Map.entry("whisperer", "the_whisperer")
-            // Add more as needed
+            Map.entry("whisperer", "the_whisperer"),
+            Map.entry("medium clue", "medium_treasure_trails" ),
+            Map.entry("easy clue","easy_treasure_trails"),
+            Map.entry("hard clue", "hard_treasure_trails"),
+            Map.entry("elite clue", "elite_treasure_trails"),
+            Map.entry("master clue", "master_treasure_trails")
     );
 }

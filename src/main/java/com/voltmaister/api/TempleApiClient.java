@@ -4,6 +4,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.Gson;
+import lombok.Getter;
+import lombok.Setter;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -16,21 +18,12 @@ public class TempleApiClient {
 
     private static final Logger log = LoggerFactory.getLogger(TempleApiClient.class);
     private static final String BASE_URL = "https://templeosrs.com/api/collection-log/player_collection_log.php";
+
+    @Getter @Setter
     private static Gson gson;
+
+    @Setter
     private static OkHttpClient httpClient;
-
-    // Injected from plugin
-    public static void setGson(Gson injectedGson) {
-        TempleApiClient.gson = injectedGson;
-    }
-
-    public static Gson getGson() {
-        return gson;
-    }
-
-    public static void setHttpClient(OkHttpClient injectedClient) {
-        TempleApiClient.httpClient = injectedClient;
-    }
 
     public static String fetchLog(String username) {
         return fetchLog(username, true);

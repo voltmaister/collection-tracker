@@ -88,7 +88,7 @@ public class CollectionTrackerPlugin extends Plugin
 	private final BufferedImage icon = LoadIcon.loadIcon();
 	private final Set<Integer> loadedItemIds = new HashSet<>();
 
-	private final ExecutorService executor = Executors.newSingleThreadExecutor();
+	private ExecutorService executor;
 
 
 
@@ -101,6 +101,10 @@ public class CollectionTrackerPlugin extends Plugin
 		log.debug("Collection Tracker started!");
 
 		CollectionDatabase.init();
+
+		if (executor == null || executor.isShutdown()) {
+			executor = Executors.newSingleThreadExecutor();
+		}
 
 		panel = new PluginPanel() {
 		};
@@ -192,7 +196,10 @@ public class CollectionTrackerPlugin extends Plugin
 		// 🧼 Clear cached icons and IDs to prevent memory buildup
 		itemIconIndexes.clear();
 		loadedItemIds.clear();
-		executor.shutdown();
+
+		if (executor != null && !executor.isShutdown()) {
+			executor.shutdownNow();
+		}
 
 		log.debug("Collection Tracker stopped!");
 	}
@@ -277,32 +284,30 @@ public class CollectionTrackerPlugin extends Plugin
 
 
 
-	private void printCollectionForCategory(String category)
-	{
-		executor.execute(() -> {
-			String playerName = client.getLocalPlayer().getName(); // ✅ declare properly
-			List<CollectionItem> items = CollectionDatabase.getItemsByCategory(playerName.toLowerCase(), category); // ✅ pass it
-
-			if (items.isEmpty()) {
-				SwingUtilities.invokeLater(() ->
-						panelLog("📁 No items found in collection log for: " + category)
-				);
-				return;
-			}
-
-			StringBuilder sb = new StringBuilder("📘 " + category.replace('_', ' ') + ":\n\n");
-			for (CollectionItem item : items) {
-				sb.append(String.format("- %s x%d\n", item.getName(), item.getCount()));
-			}
-
-			String finalText = sb.toString();
-			SwingUtilities.invokeLater(() ->
-					panelLog(finalText)
-			);
-		});
-	}
-
-
+//	private void printCollectionForCategory(String category)
+//	{
+//		executor.execute(() -> {
+//			String playerName = client.getLocalPlayer().getName(); // ✅ declare properly
+//			List<CollectionItem> items = CollectionDatabase.getItemsByCategory(playerName.toLowerCase(), category); // ✅ pass it
+//
+//			if (items.isEmpty()) {
+//				SwingUtilities.invokeLater(() ->
+//						panelLog("📁 No items found in collection log for: " + category)
+//				);
+//				return;
+//			}
+//
+//			StringBuilder sb = new StringBuilder("📘 " + category.replace('_', ' ') + ":\n\n");
+//			for (CollectionItem item : items) {
+//				sb.append(String.format("- %s x%d\n", item.getName(), item.getCount()));
+//			}
+//
+//			String finalText = sb.toString();
+//			SwingUtilities.invokeLater(() ->
+//					panelLog(finalText)
+//			);
+//		});
+//	}
 
 
 
@@ -380,14 +385,12 @@ public class CollectionTrackerPlugin extends Plugin
 					}
 
 					final String finalMessage = errorMessage;
-					SwingUtilities.invokeLater(() -> {
-						chatMessageManager.queue(
-								QueuedMessage.builder()
-										.type(ChatMessageType.GAMEMESSAGE)
-										.runeLiteFormattedMessage("<col=ff6666>" + finalMessage + "</col>")
-										.build()
-						);
-					});
+					chatMessageManager.queue(
+							QueuedMessage.builder()
+									.type(ChatMessageType.GAMEMESSAGE)
+									.runeLiteFormattedMessage("<col=ff6666>" + finalMessage + "</col>")
+									.build()
+					);
 					return;
 				}
 
@@ -412,7 +415,7 @@ public class CollectionTrackerPlugin extends Plugin
 
 			// If sender's name is same as the player being queried, omit the player's name
 			if (!event.getName().equalsIgnoreCase(playerName)) {
-				sb.append("<col=373737>")
+				sb.append("<col=ffffaa>")
 						.append(playerName)  // Append the original player name here
 						.append("'s ");
 			}

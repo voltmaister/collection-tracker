@@ -19,7 +19,6 @@ public class CollectionLogSyncService {
         Executors.newSingleThreadExecutor().execute(() -> {
             log.debug("🔄 Starting syncCollectionLog()...");
 
-            CollectionDatabase.init();
             CollectionDatabase.clearAll();
 
             if (client.getLocalPlayer() == null) {

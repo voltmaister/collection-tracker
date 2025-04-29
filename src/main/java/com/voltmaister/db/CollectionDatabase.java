@@ -3,19 +3,31 @@ package com.voltmaister.db;
 import com.voltmaister.data.CollectionItem;
 import com.voltmaister.data.CollectionResponse;
 
+import net.runelite.client.RuneLite;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.File;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CollectionDatabase {
     private static final Logger log = LoggerFactory.getLogger(CollectionDatabase.class);
 
-    private static final String DB_URL = "jdbc:h2:file:./runelite-collections;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1";
+    private static final String DB_URL = "jdbc:h2:file:" + RuneLite.RUNELITE_DIR + "/collection-tracker/runelite-collections;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1";
+
+    static {
+        File pluginDir = new File(RuneLite.RUNELITE_DIR, "collection-tracker");
+        if (!pluginDir.exists()) {
+            if (!pluginDir.mkdirs()) {
+                log.warn("⚠️ Failed to create plugin directory at {}", pluginDir.getAbsolutePath());
+            }
+        }
+    }
 
     public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(DB_URL, "sa", "");
+        return DriverManager.getConnection(DB_URL);
     }
 
     public static void init() {
