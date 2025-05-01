@@ -284,7 +284,6 @@ public class CollectionTrackerPlugin extends Plugin
 
 
 
-
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
 	{
@@ -327,7 +326,9 @@ public class CollectionTrackerPlugin extends Plugin
 		// Determine target player (specified or sender)
 		String playerName = (parts.length == 2) ? parts[1].trim() : event.getName();
 		String normalizedPlayerName = PlayerNameUtils.normalizePlayerName(playerName);  // Normalize the player name for the API call
-		String localName = client.getLocalPlayer() != null ? client.getLocalPlayer().getName() : "";
+		String localName = client.getLocalPlayer() != null
+				? PlayerNameUtils.normalizePlayerName(client.getLocalPlayer().getName())
+				: "";
 		boolean isLocalPlayer = normalizedPlayerName.equalsIgnoreCase(localName);
 
 		executor.execute(() ->
