@@ -140,5 +140,24 @@ No additional configuration needed. Just install and go.
 
 ---
 
-## 📄 License
-BSD 2-Clause LICENSE
+## Known Issues (Pending Fix)
+
+- **Player names with spaces:**  
+  If your in-game name contains spaces (e.g., `good name` instead of `good_name`), your collection log data may not display correctly.  
+  As a temporary workaround, use the command with your name exactly as it appears, including spaces:
+
+  ```
+  instead of 
+  !col boss
+  try 
+  !col boss good name
+  ```
+
+- **Aliases for bosses and minigames:**  
+  Alias support is coming in the next update. Until then, please use the full name of the boss or minigame with underscores between words. For example:
+
+  ```
+  !col fishing_trawler
+  ```
+
+Let me know if you'd like to style this for a specific platform (e.g., GitHub, Discord bot docs).
