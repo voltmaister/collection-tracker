@@ -14,8 +14,34 @@ A RuneLite plugin that tracks your **Collection Log** progress and allows you to
 - 📀 **Local database caching** with pruning to keep it clean and fast
 
 ---
+## 🚀 How to Use
 
-## 🚀 Usage
+
+
+### Step 1: Install the Temple OSRS Plugin  
+Start by installing the <strong>Temple OSRS</strong> plugin from the RuneLite Plugin Hub.
+<div align="center">
+<img src="docs/Screenshot_6.png" width="320"/>
+</div>
+
+
+### Step 2: Sync Your Collection Log  
+Sync your collection log data to the <a href="https://templeosrs.com">TempleOSRS website</a>.
+
+<div align="center">
+<img src="docs/Screenshot_7.png" width="480"/>
+</div>
+
+
+### Step 3: Install the Collection Tracker Plugin  
+Next, install the <strong>Collection Tracker</strong> plugin from the Plugin Hub.
+
+<div align="center">
+<img src="docs/Screenshot_8.png" width="320"/>
+</div>
+
+
+---
 
 ### ▶️ Plugin Panel
 
@@ -26,11 +52,11 @@ Once the plugin is enabled:
 
 <div align="center">
 
-| Button | Function |
-|--------|----------|
-| 📄 **Print Collections** | Display your synced items |
-| 🔄 **Sync Collection Log** | Sync your data with TempleOSRS |
-| ❓ **Show Commands** | See how to use chat commands |
+| Button                      | Function                      |
+|-----------------------------|-------------------------------|
+| 📄 **Print Collections**    | Display your synced items     |
+| 🔄 **Store Collection Log** | Get your data from TempleOSRS |
+| ❓ **Show Commands**         | See how to use chat commands  |
 
 <br>
 
@@ -38,10 +64,10 @@ Once the plugin is enabled:
 
 <table>
   <tr>
-    <td align="center"><strong>📦 Main Panel</strong><br><img src="docs/Screenshot_1.png" width="160"/></td>
-    <td align="center"><strong>🔄 Sync</strong><br><img src="docs/Screenshot_3.png" width="160"/></td>
-    <td align="center"><strong>📋 View Items</strong><br><img src="docs/Screenshot_4.png" width="160"/></td>
-    <td align="center"><strong>❓ Commands</strong><br><img src="docs/Screenshot_2.png" width="160"/></td>
+    <td align="center"><strong>📦 Main Panel</strong><br><img src="docs/start.png" width="160"/></td>
+    <td align="center"><strong>🔄 Store Items</strong><br><img src="docs/store.png" width="160"/></td>
+    <td align="center"><strong>📋 View Items</strong><br><img src="docs/print.png" width="160"/></td>
+    <td align="center"><strong>❓ Commands</strong><br><img src="docs/show.png" width="160"/></td>
   </tr>
 </table>
 
@@ -64,6 +90,16 @@ _Example: `!col vorkath`_
 !col boss playername
 ```
 _Example: `!col zulrah player name`_
+
+#### Minigame and Long Named Bosses
+```
+!col mini_game 
+!col boss_name
+```
+_Example: `!col general_graardor`_
+`!col fishing_trawler`
+
+In contrary to player names that don't need an underscore to function properly, boss names and minigame names have to otherwise they get mistaken for player names.
 
 #### 🔀 Supported Aliases
 Commands like `toa`, `tob`, `arma`, `graardor`, `vetion`, etc. are smart-mapped to their full names.

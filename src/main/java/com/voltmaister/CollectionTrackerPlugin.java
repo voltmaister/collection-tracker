@@ -135,7 +135,7 @@ public class CollectionTrackerPlugin extends Plugin
 		buttonPanel.add(printButton);
 		buttonPanel.add(Box.createVerticalStrut(8));
 
-		JButton syncButton = new JButton("🔄 Sync Collection Log");
+		JButton syncButton = new JButton("🔄 Store Collection Log");
 		syncButton.setAlignmentX(JButton.CENTER_ALIGNMENT);
 		syncButton.setMaximumSize(new Dimension(200, 30));
 		syncButton.setMargin(new Insets(5, 10, 5, 10));
@@ -157,7 +157,7 @@ public class CollectionTrackerPlugin extends Plugin
 
 
 		panel.add(buttonPanel);
-		panel.add(Box.createVerticalStrut(15));
+		panel.add(Box.createVerticalStrut(25));
 
 		// Output area
 		outputArea.setEditable(false);
@@ -316,7 +316,7 @@ public class CollectionTrackerPlugin extends Plugin
 	{
 		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
 		{
-			panelLog("🟢 Collection Tracker loaded. Use buttons above to sync or print.");
+			panelLog("🟢 Collection Tracker loaded. Use buttons above to store your data locally or print.");
 		}
 	}
 
