@@ -284,32 +284,6 @@ public class CollectionTrackerPlugin extends Plugin
 
 
 
-//	private void printCollectionForCategory(String category)
-//	{
-//		executor.execute(() -> {
-//			String playerName = client.getLocalPlayer().getName(); // ✅ declare properly
-//			List<CollectionItem> items = CollectionDatabase.getItemsByCategory(playerName.toLowerCase(), category); // ✅ pass it
-//
-//			if (items.isEmpty()) {
-//				SwingUtilities.invokeLater(() ->
-//						panelLog("📁 No items found in collection log for: " + category)
-//				);
-//				return;
-//			}
-//
-//			StringBuilder sb = new StringBuilder("📘 " + category.replace('_', ' ') + ":\n\n");
-//			for (CollectionItem item : items) {
-//				sb.append(String.format("- %s x%d\n", item.getName(), item.getCount()));
-//			}
-//
-//			String finalText = sb.toString();
-//			SwingUtilities.invokeLater(() ->
-//					panelLog(finalText)
-//			);
-//		});
-//	}
-
-
 
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
