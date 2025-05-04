@@ -8,10 +8,13 @@ public class CategoryAliases {
             // === Bosses ===
             Map.entry("armadyl", "kree_arra"),
             Map.entry("archeologist", "crazy_archeologist"),
-            Map.entry("bandos", "general_graardor"),
             Map.entry("barrows", "barrows_chest"),
+            Map.entry("artio", "callisto_and_artio"),
             Map.entry("callisto", "callisto_and_artio"),
+            Map.entry("vetion", "vetion_and_calvarion"),
             Map.entry("calvarion", "vetion_and_calvarion"),
+            Map.entry("calv", "vetion_and_calvarion"),
+            Map.entry("vet", "vetion_and_calvarion"),
             Map.entry("corp", "corporeal_beast"),
             Map.entry("corporeal", "corporeal_beast"),
             Map.entry("dagannoth", "dagannoth_kings"),
@@ -20,12 +23,15 @@ public class CategoryAliases {
             Map.entry("elemental", "chaos_elemental"),
             Map.entry("fanatic", "chaos_fanatic"),
             Map.entry("graardor", "general_graardor"),
+            Map.entry("bandos", "general_graardor"),
             Map.entry("grotesque", "grotesque_guardians"),
             Map.entry("hydra", "alchemical_hydra"),
             Map.entry("kbd", "king_black_dragon"),
             Map.entry("kalphite", "kalphite_queen"),
             Map.entry("kril", "kril_tsutsaroth"),
+            Map.entry("zammy", "kril_tsutsaroth"),
             Map.entry("kree", "kree_arra"),
+            Map.entry("arma", "kree_arra"),
             Map.entry("leviathan", "the_leviathan"),
             Map.entry("mole", "giant_mole"),
             Map.entry("moons", "moons_of_peril"),
@@ -37,11 +43,16 @@ public class CategoryAliases {
             Map.entry("thermy", "thermonuclear_smoke_devil"),
             Map.entry("titans", "royal_titans"),
             Map.entry("tormented", "tormented_demons"),
+            Map.entry("tds", "tormented_demons"),
             Map.entry("venenatis", "venenatis_and_spindel"),
-            Map.entry("vetion", "vetion_and_calvarion"),
             Map.entry("whisperer", "the_whisperer"),
             Map.entry("zamorak", "kril_tsutsaroth"),
             Map.entry("zilyana", "commander_zilyana"),
+            Map.entry("sara", "commander_zilyana"),
+            Map.entry("amox", "amoxliatl"),
+            Map.entry("kings", "dagannoth_kings"),
+            Map.entry("vork", "vorkath"),
+            Map.entry("huey", "the_hueycoatl"),
 
             // === Clue Scrolls ===
             Map.entry("beginner_clue", "beginner_treasure_trails"),
@@ -84,6 +95,7 @@ public class CategoryAliases {
             Map.entry("tzhaar", "tzhaar"),
             Map.entry("volcanic", "volcanic_mine"),
             Map.entry("wyrm", "colossal_wyrm_agility"),
+            Map.entry("ba", "barbarian_assault"),
 
             // === Miscellaneous ===
             Map.entry("3rd", "third_age"),
@@ -110,6 +122,7 @@ public class CategoryAliases {
             Map.entry("tob", "theatre_of_blood"),
             Map.entry("trawler", "fishing_trawler"),
             Map.entry("wars", "castle_wars"),
-            Map.entry("zuk", "the_inferno")
+            Map.entry("zuk", "the_inferno"),
+            Map.entry("colo", "fortis_colosseum")
     );
 }
