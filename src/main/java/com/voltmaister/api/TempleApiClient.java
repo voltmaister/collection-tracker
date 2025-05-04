@@ -69,7 +69,7 @@ public class TempleApiClient {
         try {
             Request request = new Request.Builder()
                     .url(urlString)
-                    .header("User-Agent", "CollectionTrackerPlugin/1.0 RuneLite")
+                    .header("User-Agent", "CollectionTrackerPlugin/1.1 RuneLite")
                     .build();
 
             try (Response response = httpClient.newCall(request).execute()) {
