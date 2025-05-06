@@ -304,7 +304,9 @@ public class CollectionTrackerPlugin extends Plugin
 		if (type != ChatMessageType.PUBLICCHAT &&
 				type != ChatMessageType.FRIENDSCHAT &&
 				type != ChatMessageType.PRIVATECHAT &&
-				type != ChatMessageType.CLAN_CHAT)
+				type != ChatMessageType.CLAN_CHAT &&
+				type != ChatMessageType.CLAN_GIM_CHAT &&
+				type != ChatMessageType.CLAN_GUEST_CHAT)
 		{
 			return;
 		}
