@@ -52,7 +52,7 @@ public class CategoryAliases {
             Map.entry("amox", "amoxliatl"),
             Map.entry("kings", "dagannoth_kings"),
             Map.entry("vork", "vorkath"),
-            Map.entry("huey", "the_hueycoatl"),
+            Map.entry("huey", "hueycoatl"),
 
             // === Clue Scrolls ===
             Map.entry("beginner_clue", "beginner_treasure_trails"),
