@@ -1,4 +1,4 @@
-# 📘 Collection Tracker
+# 📘 Collection Tracker (COLLECTION TRACKER HAS BEEN INTEGRATED TO TEMPLEOSRS PLUGIN DIRECTLY SO THIS REPO HAS STOPPED BEING MAINTAINED)
 
 A RuneLite plugin that tracks your **Collection Log** progress and allows you to view collection data for yourself or other players via chat commands or a convenient UI panel.
 
